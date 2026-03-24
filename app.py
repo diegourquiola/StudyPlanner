@@ -24,6 +24,7 @@ def get_db_connection():
     """
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
+    conn.execute('PRAGMA foreign_keys = ON')
     return conn
 
 def init_db():
@@ -46,6 +47,16 @@ def init_db():
             exam_date TEXT NOT NULL,
             difficulty INTEGER NOT NULL,
             confidence INTEGER NOT NULL
+        )
+    ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS assignments (
+            id        INTEGER PRIMARY KEY AUTOINCREMENT,
+            course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+            title     TEXT NOT NULL,
+            due_date  TEXT NOT NULL,
+            type      TEXT NOT NULL CHECK(type IN ('quiz', 'homework', 'project')),
+            completed INTEGER NOT NULL DEFAULT 0
         )
     ''')
     conn.commit()
