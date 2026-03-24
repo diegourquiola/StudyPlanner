@@ -1028,8 +1028,13 @@ a {
     text-overflow: ellipsis;
     color: var(--white);
     font-weight: 500;
+    transition: var(--transition);
 }
 .chip.completed { text-decoration: line-through; opacity: 0.6; }
+.chip.chip-clickable:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
 
 .more-chips-btn {
     display: block;
@@ -1043,3 +1048,57 @@ a {
     font-weight: 600;
 }
 .more-chips-btn:hover { text-decoration: underline; }
+
+/* ============================================
+   Schedule Assignments (in Schedule Tab)
+   ============================================ */
+.schedule-assignments {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.schedule-assignment-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 0.5rem;
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.schedule-assignment-item:hover {
+    background: var(--background);
+    transform: translateX(4px);
+}
+
+.schedule-assignment-item.completed {
+    opacity: 0.7;
+}
+
+.schedule-assignment-item.completed .schedule-assignment-title {
+    text-decoration: line-through;
+    color: var(--text-light);
+}
+
+.schedule-assignment-item input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+.schedule-assignment-title {
+    flex: 1;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.schedule-assignment-course {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    font-weight: 500;
+}

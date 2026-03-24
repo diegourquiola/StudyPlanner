@@ -373,6 +373,73 @@ async function toggleAssignment(assignmentId, completed, courseId) {
     }
 }
 
+async function toggleAssignmentFromCalendar(assignmentId, completed, courseId) {
+    try {
+        const resp = await fetch(`/api/assignments/${assignmentId}/complete`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ completed: completed ? 1 : 0 })
+        });
+        if (!resp.ok) { 
+            showNotification('Failed to update assignment', 'error'); 
+            return; 
+        }
+
+        const course = courses.find(c => c.id === courseId);
+        if (course && course.assignments) {
+            const a = course.assignments.find(a => a.id === assignmentId);
+            if (a) a.completed = completed ? 1 : 0;
+        }
+
+        renderCalendar();
+        
+        const item = document.getElementById(`assignment-item-${assignmentId}`);
+        if (item) item.classList.toggle('completed', completed);
+
+        if (lastScheduleData) showOutdatedBanner();
+
+        showNotification(completed ? 'Assignment marked as done!' : 'Assignment unmarked', 'success');
+
+    } catch {
+        showNotification('Failed to update assignment', 'error');
+    }
+}
+
+async function toggleAssignmentFromSchedule(assignmentId, completed, courseId) {
+    try {
+        const resp = await fetch(`/api/assignments/${assignmentId}/complete`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ completed: completed ? 1 : 0 })
+        });
+        if (!resp.ok) { 
+            showNotification('Failed to update assignment', 'error'); 
+            return; 
+        }
+
+        const course = courses.find(c => c.id === courseId);
+        if (course && course.assignments) {
+            const a = course.assignments.find(a => a.id === assignmentId);
+            if (a) a.completed = completed ? 1 : 0;
+        }
+
+        if (lastScheduleData) {
+            renderScheduleTimeline(lastScheduleData.schedule, document.getElementById('schedule-timeline'));
+        }
+        
+        const item = document.getElementById(`assignment-item-${assignmentId}`);
+        if (item) item.classList.toggle('completed', completed);
+
+        const calPanel = document.getElementById('tab-calendar');
+        if (calPanel && !calPanel.hidden) renderCalendar();
+
+        showNotification(completed ? 'Assignment marked as done!' : 'Assignment unmarked', 'success');
+
+    } catch {
+        showNotification('Failed to update assignment', 'error');
+    }
+}
+
 // ============================================
 // Calendar
 // ============================================
@@ -443,7 +510,9 @@ function collectChipsForDate(dateStr) {
                     type: 'assignment',
                     text: `[${a.type}] ${course.name}`,
                     color: color,
-                    completed: a.completed
+                    completed: a.completed,
+                    assignmentId: a.id,
+                    courseId: course.id
                 });
             }
         });
@@ -473,6 +542,16 @@ function renderCellChips(cell, chips) {
     visible.forEach(chip => {
         const el = document.createElement('div');
         el.className = 'chip' + (chip.completed ? ' completed' : '');
+        if (chip.type === 'assignment') {
+            el.className += ' chip-clickable';
+            el.dataset.assignmentId = chip.assignmentId;
+            el.dataset.courseId = chip.courseId;
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleAssignmentFromCalendar(chip.assignmentId, !chip.completed, chip.courseId);
+            });
+        }
         el.style.background = chip.color;
         el.textContent = chip.text;
         cell.appendChild(el);
@@ -506,6 +585,16 @@ function toggleCellExpand(cell, hiddenChips) {
         hiddenChips.forEach(chip => {
             const el = document.createElement('div');
             el.className = 'chip' + (chip.completed ? ' completed' : '');
+            if (chip.type === 'assignment') {
+                el.className += ' chip-clickable';
+                el.dataset.assignmentId = chip.assignmentId;
+                el.dataset.courseId = chip.courseId;
+                el.style.cursor = 'pointer';
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleAssignmentFromCalendar(chip.assignmentId, !chip.completed, chip.courseId);
+                });
+            }
             el.style.background = chip.color;
             el.textContent = chip.text;
             cell.appendChild(el);
@@ -731,11 +820,50 @@ function createDayCard(day) {
         `;
     });
     
+    // Find assignments for this date
+    const assignmentsForDay = [];
+    courses.forEach(course => {
+        const color = getCourseColor(course);
+        (course.assignments || []).forEach(a => {
+            if (a.due_date === day.date) {
+                assignmentsForDay.push({
+                    id: a.id,
+                    title: a.title,
+                    type: a.type,
+                    completed: a.completed,
+                    courseName: course.name,
+                    courseId: course.id,
+                    color: color
+                });
+            }
+        });
+    });
+    
+    let assignmentsHtml = '';
+    if (assignmentsForDay.length > 0) {
+        assignmentsHtml = '<div class="schedule-assignments">';
+        assignmentsForDay.forEach(assignment => {
+            assignmentsHtml += `
+                <div class="schedule-assignment-item ${assignment.completed ? 'completed' : ''}" 
+                     style="border-left: 3px solid ${assignment.color};"
+                     onclick="toggleAssignmentFromSchedule(${assignment.id}, ${!assignment.completed}, ${assignment.courseId})">
+                    <input type="checkbox" ${assignment.completed ? 'checked' : ''} 
+                           onclick="event.stopPropagation(); toggleAssignmentFromSchedule(${assignment.id}, this.checked, ${assignment.courseId})">
+                    <span class="type-badge ${assignment.type}">${assignment.type}</span>
+                    <span class="schedule-assignment-title">${escapeHtml(assignment.title)}</span>
+                    <span class="schedule-assignment-course">${escapeHtml(assignment.courseName)}</span>
+                </div>
+            `;
+        });
+        assignmentsHtml += '</div>';
+    }
+    
     card.innerHTML = `
         <div class="day-header">${formattedDate}</div>
         <div class="day-blocks">
             ${blocksHtml}
         </div>
+        ${assignmentsHtml}
     `;
     
     return card;
