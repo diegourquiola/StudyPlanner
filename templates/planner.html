@@ -10,6 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div id="outdated-banner" class="outdated-banner" style="display:none;">
+        <span>Your schedule may be outdated — regenerate?</span>
+        <button id="banner-regenerate-btn" class="btn btn-sm btn-primary">Regenerate</button>
+        <button id="banner-dismiss-btn" class="banner-dismiss">×</button>
+    </div>
+
     <div class="planner-container">
         <header class="planner-header">
             <div class="header-content">
@@ -18,91 +24,41 @@
             </div>
         </header>
 
+        <nav class="tab-bar">
+            <button class="tab-btn active" data-tab="courses">Courses &amp; Assignments</button>
+            <button class="tab-btn" data-tab="calendar">Calendar</button>
+            <button class="tab-btn" data-tab="schedule">Schedule</button>
+        </nav>
+
         <main class="planner-main">
-            <div class="planner-grid">
+
+            <!-- Tab 1: Courses & Assignments -->
+            <div id="tab-courses" class="tab-panel planner-grid">
                 <aside class="sidebar">
                     <section class="input-section">
                         <h2>Add Course</h2>
                         <form id="course-form" class="course-form">
                             <div class="form-group">
                                 <label for="course-name">Course Name</label>
-                                <input 
-                                    type="text" 
-                                    id="course-name" 
-                                    name="course-name" 
-                                    placeholder="e.g., Calculus" 
-                                    required
-                                >
+                                <input type="text" id="course-name" name="course-name" placeholder="e.g., Calculus" required>
                             </div>
-
                             <div class="form-group">
                                 <label for="exam-date">Exam/Assignment Date</label>
-                                <input 
-                                    type="date" 
-                                    id="exam-date" 
-                                    name="exam-date" 
-                                    required
-                                >
+                                <input type="date" id="exam-date" name="exam-date" required>
                             </div>
-
                             <div class="form-group">
-                                <label for="difficulty">
-                                    Difficulty Level: <span id="difficulty-value">3</span>
-                                </label>
-                                <div class="slider-labels">
-                                    <span>Easy</span>
-                                    <span>Hard</span>
-                                </div>
-                                <input 
-                                    type="range" 
-                                    id="difficulty" 
-                                    name="difficulty" 
-                                    min="1" 
-                                    max="5" 
-                                    value="3"
-                                    class="slider"
-                                >
+                                <label for="difficulty">Difficulty Level: <span id="difficulty-value">3</span></label>
+                                <div class="slider-labels"><span>Easy</span><span>Hard</span></div>
+                                <input type="range" id="difficulty" name="difficulty" min="1" max="5" value="3" class="slider">
                             </div>
-
                             <div class="form-group">
-                                <label for="confidence">
-                                    Confidence Level: <span id="confidence-value">3</span>
-                                </label>
-                                <div class="slider-labels">
-                                    <span>Low</span>
-                                    <span>High</span>
-                                </div>
-                                <input 
-                                    type="range" 
-                                    id="confidence" 
-                                    name="confidence" 
-                                    min="1" 
-                                    max="5" 
-                                    value="3"
-                                    class="slider"
-                                >
+                                <label for="confidence">Confidence Level: <span id="confidence-value">3</span></label>
+                                <div class="slider-labels"><span>Low</span><span>High</span></div>
+                                <input type="range" id="confidence" name="confidence" min="1" max="5" value="3" class="slider">
                             </div>
-
                             <button type="submit" class="btn btn-primary">Add Course</button>
                         </form>
-
                         <button id="load-demo-btn" class="btn btn-secondary">Load Demo Data</button>
-                    </section>
-
-                    <section class="hours-section">
-                        <h2>Study Time Available</h2>
-                        <div class="form-group">
-                            <label for="available-hours">Hours per day</label>
-                            <input 
-                                type="number" 
-                                id="available-hours" 
-                                name="available-hours" 
-                                min="1" 
-                                max="12" 
-                                value="4"
-                                step="0.5"
-                            >
-                        </div>
                     </section>
                 </aside>
 
@@ -118,28 +74,54 @@
                             </div>
                         </div>
                     </section>
+                </div>
+            </div>
 
+            <!-- Tab 2: Calendar -->
+            <div id="tab-calendar" class="tab-panel" hidden>
+                <div class="calendar-container">
+                    <div class="calendar-nav">
+                        <button id="prev-month-btn" class="btn btn-secondary">&#8249;</button>
+                        <h2 id="calendar-month-label"></h2>
+                        <button id="next-month-btn" class="btn btn-secondary">&#8250;</button>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid">
+                        <div class="calendar-day-header">Sun</div>
+                        <div class="calendar-day-header">Mon</div>
+                        <div class="calendar-day-header">Tue</div>
+                        <div class="calendar-day-header">Wed</div>
+                        <div class="calendar-day-header">Thu</div>
+                        <div class="calendar-day-header">Fri</div>
+                        <div class="calendar-day-header">Sat</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Schedule -->
+            <div id="tab-schedule" class="tab-panel" hidden>
+                <div class="schedule-tab-content">
+                    <section class="hours-section">
+                        <h2>Study Time Available</h2>
+                        <div class="form-group">
+                            <label for="available-hours">Hours per day</label>
+                            <input type="number" id="available-hours" name="available-hours" min="1" max="12" value="4" step="0.5">
+                        </div>
+                    </section>
                     <section class="generate-section">
-                        <button id="generate-schedule-btn" class="btn btn-primary btn-large">
-                            Generate Schedule
-                        </button>
+                        <button id="generate-schedule-btn" class="btn btn-primary btn-large">Generate Schedule</button>
                         <div id="loading-spinner" class="loading-spinner" style="display: none;">
                             <div class="spinner"></div>
                             <p>Generating your optimized schedule...</p>
                         </div>
                     </section>
-
                     <section id="schedule-section" class="schedule-section" style="display: none;">
                         <h2>Your Optimized Study Schedule</h2>
-                        
-                        <div id="schedule-summary" class="schedule-summary">
-                        </div>
-
-                        <div id="schedule-timeline" class="schedule-timeline">
-                        </div>
+                        <div id="schedule-summary" class="schedule-summary"></div>
+                        <div id="schedule-timeline" class="schedule-timeline"></div>
                     </section>
                 </div>
             </div>
+
         </main>
     </div>
 
