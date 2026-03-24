@@ -171,6 +171,57 @@ def delete_course(course_id):
     
     return jsonify({'message': 'Course deleted successfully'}), 200
 
+
+@app.route('/api/courses/<int:course_id>/assignments', methods=['GET'])
+def get_assignments(course_id):
+    conn = get_db_connection()
+    course = conn.execute('SELECT id FROM courses WHERE id = ?', (course_id,)).fetchone()
+    if not course:
+        conn.close()
+        return jsonify({'error': 'Course not found'}), 404
+    assignments = conn.execute(
+        'SELECT * FROM assignments WHERE course_id = ? ORDER BY due_date ASC',
+        (course_id,)
+    ).fetchall()
+    conn.close()
+    return jsonify([dict(a) for a in assignments])
+
+
+@app.route('/api/courses/<int:course_id>/assignments', methods=['POST'])
+def add_assignment(course_id):
+    data = request.get_json()
+    if not data or not all(k in data for k in ['title', 'due_date', 'type']):
+        return jsonify({'error': 'Missing required fields'}), 400
+    if data['type'] not in ('quiz', 'homework', 'project'):
+        return jsonify({'error': 'Invalid type'}), 400
+    try:
+        datetime.strptime(data['due_date'], '%Y-%m-%d')
+    except ValueError:
+        return jsonify({'error': 'Invalid due_date format'}), 400
+
+    conn = get_db_connection()
+    course = conn.execute('SELECT id FROM courses WHERE id = ?', (course_id,)).fetchone()
+    if not course:
+        conn.close()
+        return jsonify({'error': 'Course not found'}), 404
+
+    cursor = conn.execute(
+        'INSERT INTO assignments (course_id, title, due_date, type, completed) VALUES (?, ?, ?, ?, 0)',
+        (course_id, data['title'], data['due_date'], data['type'])
+    )
+    conn.commit()
+    assignment_id = cursor.lastrowid
+    conn.close()
+
+    return jsonify({
+        'id': assignment_id,
+        'course_id': course_id,
+        'title': data['title'],
+        'due_date': data['due_date'],
+        'type': data['type'],
+        'completed': 0
+    }), 201
+
 @app.route('/api/load-demo', methods=['POST'])
 def load_demo():
     """
