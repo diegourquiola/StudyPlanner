@@ -194,3 +194,18 @@ def test_patch_complete_invalid_value(client):
 def test_patch_complete_not_found(client):
     resp = client.patch('/api/assignments/999/complete', json={'completed': 1})
     assert resp.status_code == 404
+
+
+def test_load_demo_seeds_assignments(client):
+    resp = client.post('/api/load-demo')
+    assert resp.status_code == 200
+
+    courses = client.get('/api/courses').get_json()
+    assert len(courses) == 4
+
+    total_assignments = 0
+    for course in courses:
+        assignments = client.get(f'/api/courses/{course["id"]}/assignments').get_json()
+        total_assignments += len(assignments)
+
+    assert total_assignments == 6

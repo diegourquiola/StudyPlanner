@@ -268,49 +268,42 @@ def load_demo():
     to showcase the scheduling algorithm.
     """
     conn = get_db_connection()
-    
-    # Clear existing courses
     conn.execute('DELETE FROM courses')
-    
-    # Calculate demo dates (from today)
+
     today = datetime.now()
     demo_courses = [
-        {
-            'name': 'Calculus Exam',
-            'exam_date': (today + timedelta(days=10)).strftime('%Y-%m-%d'),
-            'difficulty': 5,
-            'confidence': 2
-        },
-        {
-            'name': 'Physics Final',
-            'exam_date': (today + timedelta(days=7)).strftime('%Y-%m-%d'),
-            'difficulty': 4,
-            'confidence': 3
-        },
-        {
-            'name': 'History Essay',
-            'exam_date': (today + timedelta(days=14)).strftime('%Y-%m-%d'),
-            'difficulty': 2,
-            'confidence': 4
-        },
-        {
-            'name': 'Programming Project',
-            'exam_date': (today + timedelta(days=5)).strftime('%Y-%m-%d'),
-            'difficulty': 5,
-            'confidence': 4
-        }
+        {'name': 'Calculus Exam', 'exam_date': (today + timedelta(days=10)).strftime('%Y-%m-%d'), 'difficulty': 5, 'confidence': 2},
+        {'name': 'Physics Final', 'exam_date': (today + timedelta(days=7)).strftime('%Y-%m-%d'), 'difficulty': 4, 'confidence': 3},
+        {'name': 'History Essay', 'exam_date': (today + timedelta(days=14)).strftime('%Y-%m-%d'), 'difficulty': 2, 'confidence': 4},
+        {'name': 'Programming Project', 'exam_date': (today + timedelta(days=5)).strftime('%Y-%m-%d'), 'difficulty': 5, 'confidence': 4},
     ]
-    
-    # Insert demo courses
+
+    course_ids = {}
     for course in demo_courses:
-        conn.execute(
+        cursor = conn.execute(
             'INSERT INTO courses (name, exam_date, difficulty, confidence) VALUES (?, ?, ?, ?)',
             (course['name'], course['exam_date'], course['difficulty'], course['confidence'])
         )
-    
+        course_ids[course['name']] = cursor.lastrowid
+
+    demo_assignments = [
+        {'course': 'Calculus Exam',      'title': 'Problem Set 5',  'type': 'homework', 'days': 3},
+        {'course': 'Calculus Exam',      'title': 'Chapter Quiz',   'type': 'quiz',     'days': 7},
+        {'course': 'Physics Final',      'title': 'Lab Report',     'type': 'homework', 'days': 4},
+        {'course': 'Physics Final',      'title': 'Midterm Review', 'type': 'homework', 'days': 6},
+        {'course': 'History Essay',      'title': 'Outline Draft',  'type': 'homework', 'days': 2},
+        {'course': 'Programming Project','title': 'Code Review',    'type': 'project',  'days': 3},
+    ]
+
+    for a in demo_assignments:
+        due_date = (today + timedelta(days=a['days'])).strftime('%Y-%m-%d')
+        conn.execute(
+            'INSERT INTO assignments (course_id, title, due_date, type, completed) VALUES (?, ?, ?, ?, 0)',
+            (course_ids[a['course']], a['title'], due_date, a['type'])
+        )
+
     conn.commit()
     conn.close()
-    
     return jsonify({'message': 'Demo data loaded successfully', 'count': len(demo_courses)}), 200
 
 @app.route('/api/generate-schedule', methods=['POST'])
