@@ -963,6 +963,13 @@ a {
 }
 .calendar-nav h2 { font-size: 1.3rem; font-weight: 600; }
 
+.calendar-nav .btn-secondary {
+    padding: 0.4rem 0.8rem;
+    font-size: 1.2rem;
+    width: auto;
+    margin-top: 0;
+}
+
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);

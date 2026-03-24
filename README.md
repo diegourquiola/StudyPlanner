@@ -5,6 +5,8 @@ A full-stack web application that helps students optimize their study time by ge
 ## Features
 
 - **Smart Course Management**: Add courses with exam dates, difficulty ratings, and confidence levels
+- **Assignment Tracking**: Track quizzes, homework, and projects with due dates
+- **Calendar View**: Visual month-by-month calendar showing all assignments and exams
 - **Intelligent Scheduling Algorithm**: Prioritizes study time based on:
   - Course difficulty (1-5 scale)
   - Your confidence level (1-5 scale)
@@ -58,14 +60,17 @@ A full-stack web application that helps students optimize their study time by ge
 
 3. **Get started**:
    - Click "Get Started" on the landing page
+   - Navigate through the three tabs: Courses & Assignments, Calendar, and Schedule
    - Add your courses or click "Load Demo Data" for a quick demo
-   - Set your available study hours per day
+   - Add assignments to each course (quizzes, homework, projects)
+   - View all assignments in the calendar view
+   - Set your available study hours per day in the Schedule tab
    - Click "Generate Schedule" to see your optimized study plan
 
 ## Project Structure
 
 ```
-studysync/
+StudyPlanner/
 ├── app.py                 # Flask backend with API routes and scheduling algorithm
 ├── requirements.txt       # Python dependencies (Flask)
 ├── studysync.db          # SQLite database (auto-created on first run)
@@ -74,9 +79,13 @@ studysync/
 │   │   └── style.css     # All styling with responsive design
 │   └── js/
 │       └── app.js        # Frontend logic and API communication
-└── templates/
-    ├── index.html        # Landing page
-    └── planner.html      # Main planner interface
+├── templates/
+│   ├── index.html        # Landing page
+│   └── planner.html      # Main planner interface
+└── tests/
+    ├── conftest.py       # Test configuration and fixtures
+    ├── test_assignments.py
+    └── test_schedule.py
 ```
 
 ## How the Algorithm Works
@@ -111,12 +120,23 @@ For a student with 4 hours available per day and these courses:
 
 ## API Endpoints
 
+### Pages
 - `GET /` - Landing page
-- `GET /planner` - Main planner interface
+- `GET /planner` - Main planner interface with tabs
+
+### Courses
 - `GET /api/courses` - Get all courses
 - `POST /api/add-course` - Add a new course
 - `DELETE /api/courses/<id>` - Delete a course
 - `POST /api/load-demo` - Load demo data
+
+### Assignments
+- `GET /api/assignments` - Get all assignments
+- `POST /api/assignments` - Add a new assignment
+- `PUT /api/assignments/<id>` - Toggle assignment completion status
+- `DELETE /api/assignments/<id>` - Delete an assignment
+
+### Schedule
 - `POST /api/generate-schedule` - Generate optimized schedule
 
 ## Demo Data
@@ -133,18 +153,23 @@ This demonstrates how the algorithm prioritizes urgent, difficult courses while 
 
 - **Color Palette**: Navy (#1a1a2e), Accent Blue (#4361ee), Success Green (#06ffa5)
 - **Typography**: Inter font family from Google Fonts
-- **UI Components**: Card-based layout with smooth transitions and hover effects
+- **UI Components**: 
+  - Card-based layout with smooth transitions and hover effects
+  - Tabbed navigation for Courses, Calendar, and Schedule views
+  - Interactive calendar with assignment chips
+  - Color-coded course assignments
 - **Responsive**: Mobile-first design with breakpoints at 768px and 1024px
 
-## Code Comments
+## Code Quality
 
-The code is extensively commented to explain:
-- Database schema and initialization
-- API endpoint functionality
-- Scheduling algorithm logic (step-by-step)
-- Frontend functions and event handlers
+The code includes:
+- Database schema with courses and assignments tables
+- RESTful API endpoints for CRUD operations
+- Priority-based scheduling algorithm (step-by-step comments)
+- Frontend state management and event handlers
+- Comprehensive test suite using pytest
 
-This makes it easy to walk through the implementation in presentations or code reviews.
+This makes it easy to understand the implementation and extend functionality.
 
 ## Future Enhancements
 
