@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudySync - Smart Study Planner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="landing-container">
+        <div class="hero-section">
+            <div class="hero-content">
+                <h1 class="app-title">StudySync</h1>
+                <p class="tagline">Study smarter, not harder</p>
+                <p class="description">
+                    StudySync helps you optimize your study time by creating personalized daily schedules. 
+                    Simply input your courses, exam dates, difficulty levels, and confidence ratings, 
+                    and let our smart algorithm prioritize your study sessions to maximize your success.
+                </p>
+                <a href="/planner" class="cta-button">Get Started</a>
+            </div>
+            <div class="hero-illustration">
+                <div class="illustration-card">
+                    <div class="card-header">Today's Study Plan</div>
+                    <div class="card-body">
+                        <div class="study-block" style="background: linear-gradient(135deg, #4361ee 0%, #5a7bff 100%);">
+                            <span>Calculus</span>
+                            <span>2.5h</span>
+                        </div>
+                        <div class="study-block" style="background: linear-gradient(135deg, #06ffa5 0%, #2affc4 100%);">
+                            <span>Physics</span>
+                            <span>1.5h</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features-section">
+            <h2>How It Works</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📚</div>
+                    <h3>Add Your Courses</h3>
+                    <p>Input course names, exam dates, difficulty ratings, and confidence levels</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Smart Prioritization</h3>
+                    <p>Our algorithm considers difficulty, confidence, and deadlines to prioritize effectively</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📅</div>
+                    <h3>Get Your Schedule</h3>
+                    <p>Receive a day-by-day study plan optimized for your success</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

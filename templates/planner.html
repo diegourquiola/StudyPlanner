@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planner - StudySync</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="planner-container">
+        <header class="planner-header">
+            <div class="header-content">
+                <h1><a href="/" class="logo">StudySync</a></h1>
+                <p class="subtitle">Your Smart Study Planner</p>
+            </div>
+        </header>
+
+        <main class="planner-main">
+            <div class="planner-grid">
+                <aside class="sidebar">
+                    <section class="input-section">
+                        <h2>Add Course</h2>
+                        <form id="course-form" class="course-form">
+                            <div class="form-group">
+                                <label for="course-name">Course Name</label>
+                                <input 
+                                    type="text" 
+                                    id="course-name" 
+                                    name="course-name" 
+                                    placeholder="e.g., Calculus" 
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="exam-date">Exam/Assignment Date</label>
+                                <input 
+                                    type="date" 
+                                    id="exam-date" 
+                                    name="exam-date" 
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="difficulty">
+                                    Difficulty Level: <span id="difficulty-value">3</span>
+                                </label>
+                                <div class="slider-labels">
+                                    <span>Easy</span>
+                                    <span>Hard</span>
+                                </div>
+                                <input 
+                                    type="range" 
+                                    id="difficulty" 
+                                    name="difficulty" 
+                                    min="1" 
+                                    max="5" 
+                                    value="3"
+                                    class="slider"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confidence">
+                                    Confidence Level: <span id="confidence-value">3</span>
+                                </label>
+                                <div class="slider-labels">
+                                    <span>Low</span>
+                                    <span>High</span>
+                                </div>
+                                <input 
+                                    type="range" 
+                                    id="confidence" 
+                                    name="confidence" 
+                                    min="1" 
+                                    max="5" 
+                                    value="3"
+                                    class="slider"
+                                >
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Add Course</button>
+                        </form>
+
+                        <button id="load-demo-btn" class="btn btn-secondary">Load Demo Data</button>
+                    </section>
+
+                    <section class="hours-section">
+                        <h2>Study Time Available</h2>
+                        <div class="form-group">
+                            <label for="available-hours">Hours per day</label>
+                            <input 
+                                type="number" 
+                                id="available-hours" 
+                                name="available-hours" 
+                                min="1" 
+                                max="12" 
+                                value="4"
+                                step="0.5"
+                            >
+                        </div>
+                    </section>
+                </aside>
+
+                <div class="main-content">
+                    <section class="courses-section">
+                        <div class="section-header">
+                            <h2>Your Courses</h2>
+                            <span id="course-count" class="count-badge">0</span>
+                        </div>
+                        <div id="courses-list" class="courses-list">
+                            <div class="empty-state">
+                                <p>No courses added yet. Add your first course to get started!</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="generate-section">
+                        <button id="generate-schedule-btn" class="btn btn-primary btn-large">
+                            Generate Schedule
+                        </button>
+                        <div id="loading-spinner" class="loading-spinner" style="display: none;">
+                            <div class="spinner"></div>
+                            <p>Generating your optimized schedule...</p>
+                        </div>
+                    </section>
+
+                    <section id="schedule-section" class="schedule-section" style="display: none;">
+                        <h2>Your Optimized Study Schedule</h2>
+                        
+                        <div id="schedule-summary" class="schedule-summary">
+                        </div>
+
+                        <div id="schedule-timeline" class="schedule-timeline">
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
