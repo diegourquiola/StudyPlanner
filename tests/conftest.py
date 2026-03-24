@@ -1,5 +1,4 @@
 import pytest
-import os
 import app as app_module
 
 
