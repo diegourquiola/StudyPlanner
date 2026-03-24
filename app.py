@@ -385,6 +385,17 @@ def generate_optimized_schedule(courses: List[Dict], available_hours: float) -> 
     # Color palette for courses (cycles through these)
     colors = ['#4361ee', '#06ffa5', '#f72585', '#7209b7', '#fb5607', '#38b000']
     
+    # Fetch incomplete assignments for each course
+    conn = get_db_connection()
+    course_assignments = {}
+    for course in courses:
+        rows = conn.execute(
+            'SELECT * FROM assignments WHERE course_id = ? AND completed = 0',
+            (course['id'],)
+        ).fetchall()
+        course_assignments[course['id']] = [dict(r) for r in rows]
+    conn.close()
+    
     # Assign consistent colors to each course
     course_colors = {}
     for idx, course in enumerate(courses):
@@ -439,15 +450,23 @@ def generate_optimized_schedule(courses: List[Dict], available_hours: float) -> 
             exam_date = datetime.strptime(course['exam_date'], '%Y-%m-%d').date()
             days_until = (exam_date - current_date).days
             
-            # Avoid division by zero: if exam is today, treat as 0.5 days
+            incomplete = course_assignments.get(course['id'], [])
+            # Preserve existing floor: exam today counts as 0.5 days
             if days_until == 0:
                 days_until = 0.5
-            
-            # Priority formula: difficulty × (6 - confidence) / days_until_exam
-            # Higher difficulty = more priority
-            # Lower confidence (higher (6-confidence)) = more priority
-            # Fewer days until exam = more priority
-            priority = course['difficulty'] * (6 - course['confidence']) / days_until
+            base_priority = course['difficulty'] * (6 - course['confidence']) / days_until
+
+            if not incomplete:
+                priority = base_priority * 0.75
+            else:
+                assignment_boost = 0.0
+                for a in incomplete:
+                    due_date = datetime.strptime(a['due_date'], '%Y-%m-%d').date()
+                    days_until_due = (due_date - current_date).days
+                    if days_until_due <= 14:
+                        days_until_due = max(0.5, float(days_until_due))
+                        assignment_boost += 1.0 / days_until_due
+                priority = base_priority + assignment_boost
             priorities[course['name']] = priority
         
         # Calculate total priority for normalization
