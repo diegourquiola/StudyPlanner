@@ -126,3 +126,71 @@ def test_get_assignments_ordered_by_date(client):
     assignments = client.get(f'/api/courses/{course_id}/assignments').get_json()
     assert assignments[0]['title'] == 'Earlier'
     assert assignments[1]['title'] == 'Later'
+
+
+def _make_course_and_assignment(client):
+    """Helper: create a course and one assignment, return (course_id, assignment_id)."""
+    client.post('/api/add-course', json={
+        'name': 'Math', 'exam_date': '2026-12-01', 'difficulty': 3, 'confidence': 3
+    })
+    course_id = client.get('/api/courses').get_json()[0]['id']
+    resp = client.post(f'/api/courses/{course_id}/assignments', json={
+        'title': 'HW1', 'due_date': '2026-04-10', 'type': 'homework'
+    })
+    return course_id, resp.get_json()['id']
+
+
+def test_delete_assignment_success(client):
+    _, assignment_id = _make_course_and_assignment(client)
+    resp = client.delete(f'/api/assignments/{assignment_id}')
+    assert resp.status_code == 200
+    assert 'message' in resp.get_json()
+
+
+def test_delete_assignment_not_found(client):
+    resp = client.delete('/api/assignments/999')
+    assert resp.status_code == 404
+    assert resp.get_json()['error'] == 'Assignment not found'
+
+
+def test_patch_complete_success(client):
+    _, assignment_id = _make_course_and_assignment(client)
+    resp = client.patch(f'/api/assignments/{assignment_id}/complete', json={'completed': 1})
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data['completed'] == 1
+    assert data['id'] == assignment_id
+
+
+def test_patch_complete_idempotent(client):
+    """Setting completed=1 twice should still return completed=1."""
+    _, assignment_id = _make_course_and_assignment(client)
+    client.patch(f'/api/assignments/{assignment_id}/complete', json={'completed': 1})
+    resp = client.patch(f'/api/assignments/{assignment_id}/complete', json={'completed': 1})
+    assert resp.status_code == 200
+    assert resp.get_json()['completed'] == 1
+
+
+def test_patch_complete_missing_field(client):
+    _, assignment_id = _make_course_and_assignment(client)
+    resp = client.patch(f'/api/assignments/{assignment_id}/complete', json={})
+    assert resp.status_code == 400
+    assert resp.get_json()['error'] == 'Missing completed field'
+
+
+def test_patch_complete_no_body(client):
+    _, assignment_id = _make_course_and_assignment(client)
+    resp = client.patch(f'/api/assignments/{assignment_id}/complete')
+    assert resp.status_code == 400
+
+
+def test_patch_complete_invalid_value(client):
+    _, assignment_id = _make_course_and_assignment(client)
+    resp = client.patch(f'/api/assignments/{assignment_id}/complete', json={'completed': 2})
+    assert resp.status_code == 400
+    assert resp.get_json()['error'] == 'Invalid completed value'
+
+
+def test_patch_complete_not_found(client):
+    resp = client.patch('/api/assignments/999/complete', json={'completed': 1})
+    assert resp.status_code == 404

@@ -222,6 +222,41 @@ def add_assignment(course_id):
         'completed': 0
     }), 201
 
+
+@app.route('/api/assignments/<int:assignment_id>', methods=['DELETE'])
+def delete_assignment(assignment_id):
+    conn = get_db_connection()
+    result = conn.execute('DELETE FROM assignments WHERE id = ?', (assignment_id,))
+    conn.commit()
+    conn.close()
+    if result.rowcount == 0:
+        return jsonify({'error': 'Assignment not found'}), 404
+    return jsonify({'message': 'Assignment deleted successfully'}), 200
+
+
+@app.route('/api/assignments/<int:assignment_id>/complete', methods=['PATCH'])
+def complete_assignment(assignment_id):
+    if not request.is_json:
+        return jsonify({'error': 'Missing completed field'}), 400
+    data = request.get_json()
+    if not data or 'completed' not in data:
+        return jsonify({'error': 'Missing completed field'}), 400
+    if data['completed'] not in (0, 1):
+        return jsonify({'error': 'Invalid completed value'}), 400
+
+    conn = get_db_connection()
+    result = conn.execute(
+        'UPDATE assignments SET completed = ? WHERE id = ?',
+        (data['completed'], assignment_id)
+    )
+    conn.commit()
+    if result.rowcount == 0:
+        conn.close()
+        return jsonify({'error': 'Assignment not found'}), 404
+    assignment = conn.execute('SELECT * FROM assignments WHERE id = ?', (assignment_id,)).fetchone()
+    conn.close()
+    return jsonify(dict(assignment)), 200
+
 @app.route('/api/load-demo', methods=['POST'])
 def load_demo():
     """
